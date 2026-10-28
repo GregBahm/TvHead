@@ -1,0 +1,53 @@
+TvHead is a local browser-based editor for creating channels for an art project.
+
+VideoContent contains source footage, saved edits, and output videos and is not
+checked into git. Each top-level folder in VideoContent/Source is a channel.
+Videos can be nested in source folders within each channel.
+
+Show footage in a collapsible sidebar file tree: channels at the top level,
+nested folders beneath them, and source files within their folders. Do not show
+a sidebar heading or explanatory path text. Let the user position
+and resize a 4:3 landscape frame for each source, preview it, and select
+multiple start/end ranges. Clips can be manually reordered within each channel.
+Save edits across restarts without changing the original footage.
+
+Clip selection happens on the video timeline, not in a separate form. A plus
+button follows the playhead. Press it to anchor a clip; then move forward or
+backward within the gap between existing clips and press the checkmark to finish.
+The closest neighboring clip or video edge limits selection. Clips cannot overlap.
+Completed clips appear as time-aligned blocks on a single row below the slider,
+with play/delete buttons and draggable edges for non-overlapping trimming.
+
+The file tree is flush with the left screen edge. An adjustable divider separates
+the source editor from a live 4:3 output preview. The preview plays all selected
+clips in the current channel sequentially, with their crops, black padding, and
+audio, without moving the source playhead. An output time slider scrubs across
+the whole channel sequence and follows playback. A horizontal clip strip below it allows
+dragging clips left/right to reorder. New clips append at the end; deleting clips
+closes the gap. Do not show the old playlist panel.
+
+Apply a real-time CRT shader to the output preview after framing and padding.
+Below the output, provide an on/off toggle and sliders for scanlines, screen
+curvature, RGB separation, glow, and vignette. One saved set of tunings applies
+to every channel; disabling the effect preserves those tunings. Use the same
+shader in exports when enabled. Do not apply it to the source editor or source files.
+
+Put an Export all button at the bottom left. Replace the MP4 exports in the
+output folder with one video for every channel with associated clips, matching
+the current clip order, trimming, framing, audio, and CRT settings. Skip empty
+channels. Stage the complete replacement set before publishing, retaining the
+previous exports if rendering fails. Show progress and errors near the button.
+
+The frame can extend beyond the source footage, with black padding wherever no
+footage exists. Corner handles resize while preserving 4:3, and frame dragging
+allows movement outside the footage. All framing controls live on the video
+overlay: no separate crop controls or page header. The editing view fits both
+the source and frame, including the black padding.
+
+Saved-edit formats may change incompatibly during early development.
+
+Export each channel's selected clips in playlist order to VideoContent/Output
+as an iPad-compatible H.264/AAC MP4 at 30 fps. Use the highest cropped source
+resolution in that playlist, including enlarged frames and black padding, and
+upscale smaller footage to match. Preserve
+source audio and insert silence for sources without audio.

@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TvHead | Channel editor</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="{{ url_for('static', filename='crt.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</head>
+<body>
+  <script id="crt-shader" type="x-shader/x-fragment">{{ crt_shader|safe }}</script>
+  <svg class="icon-defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+    <defs>
+      <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></symbol>
+      <symbol id="icon-check" viewBox="0 0 24 24"><path d="m5 13 4 4L19 7"></path></symbol>
+      <symbol id="icon-trash" viewBox="0 0 24 24"><path d="M3 6h18M9 6V4h6v2M5 6l1 14h12l1-14M10 10v6M14 10v6"></path></symbol>
+    </defs>
+  </svg>
+  <div id="error" class="notice error" role="alert" hidden></div>
+  <div id="warnings" class="notice" hidden></div>
+  <main>
+    <aside class="library panel">
+      <nav id="library" aria-label="Channels and source footage"></nav>
+      <div class="library-export">
+        <div id="export-state" role="status" hidden>
+          <progress id="export-progress" max="100" value="0" aria-label="Export progress"></progress>
+          <p id="export-message"></p>
+        </div>
+        <button id="export-all" type="button" disabled title="Replace existing MP4 exports with all channels that have clips">Export all</button>
+      </div>
+    </aside>
+    <div id="workspace" class="workspace">
+    <section id="source-editor" class="editor panel" aria-label="Source editor">
+      <div id="empty-editor" class="empty">Your next channel starts here.<br><small>Select a video on the left.</small></div>
+      <div id="editor-controls" hidden>
+        <div class="stage" id="stage">
+          <video id="video" playsinline preload="metadata"></video>
+          <div id="crop-frame">
+            <span>4:3</span>
+            <button type="button" class="crop-handle nw" data-corner="nw" aria-label="Resize top left corner"></button>
+            <button type="button" class="crop-handle ne" data-corner="ne" aria-label="Resize top right corner"></button>
+            <button type="button" class="crop-handle sw" data-corner="sw" aria-label="Resize bottom left corner"></button>
+            <button type="button" class="crop-handle se" data-corner="se" aria-label="Resize bottom right corner"></button>
+          </div>
+        </div>
+        <div class="transport"><button id="play">Play</button><output id="time">00:00.00 / 00:00.00</output></div>
+        <div id="timeline" class="timeline" aria-label="Source clip timeline">
+          <div class="timeline-main">
+            <div class="timeline-highlights" aria-hidden="true">
+              <div id="available-range" hidden></div>
+              <div id="draft-range" hidden></div>
+              <div id="draft-anchor" hidden></div>
+            </div>
+            <input id="seek" type="range" min="0" max="1" step="0.01" value="0" aria-label="Playback position">
+            <button id="clip-action" type="button" data-icon="plus" aria-label="Start clip" title="Start a clip at this time"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#icon-plus"></use></svg></button>
+          </div>
+          <div id="clip-track" class="clip-track" aria-label="Selected source clips"></div>
+        </div>
+        <p id="preview-error" class="notice" hidden>This browser cannot decode this source. Timeline selection and export still work; try Edge or Chrome for MP4 playback.</p>
+      </div>
+    </section>
+    <div id="panel-divider" class="panel-divider" role="separator" aria-label="Resize source and output panels" aria-orientation="vertical" aria-controls="source-editor output-preview" aria-valuemin="20" aria-valuemax="80" aria-valuenow="50" tabindex="0"></div>
+    <section id="output-preview" class="output-preview panel" aria-label="Channel output preview">
+      <div id="output-stage" class="output-stage">
+        <canvas id="output-canvas" width="960" height="720" role="img" aria-label="Cropped channel output"></canvas>
+        <canvas id="crt-canvas" width="960" height="720" aria-hidden="true" hidden></canvas>
+        <div id="output-empty" class="output-empty">Select clips to preview this channel.</div>
+      </div>
+      <video id="output-video" playsinline preload="metadata" hidden></video>
+      <div class="transport">
+        <button id="output-play" type="button" aria-label="Play channel" disabled>Play</button>
+        <output id="output-time">00:00.00 / 00:00.00</output>
+      </div>
+      <div class="output-timeline">
+        <input id="output-seek" type="range" min="0" max="1" step="any" value="0" aria-label="Channel playback position" disabled>
+      </div>
+      <div id="output-sequence" class="output-sequence" aria-label="Channel clip order"></div>
+      <fieldset id="crt-controls" class="crt-controls" aria-label="CRT effect settings for all channels">
+        <div class="crt-heading">
+          <label class="crt-toggle"><input id="crt-enabled" type="checkbox" role="switch" checked> CRT effect</label>
+          <span>All channels</span>
+        </div>
+        <div class="crt-sliders">
+          {% for key, parameter in crt_parameters.items() %}
+          <div class="crt-control">
+            <label for="crt-{{ key }}">{{ parameter.label }}</label>
+            <output id="crt-{{ key }}-value" for="crt-{{ key }}" aria-hidden="true">{{ (parameter.default * 100)|round|int }}%</output>
+            <input id="crt-{{ key }}" data-crt="{{ key }}" type="range" min="0" max="1" step="0.01" value="{{ parameter.default }}">
+          </div>
+          {% endfor %}
+        </div>
+        <p id="crt-error" class="notice error" role="alert" hidden></p>
+      </fieldset>
+    </section>
+    </div>
+  </main>
+</body>
+</html>
